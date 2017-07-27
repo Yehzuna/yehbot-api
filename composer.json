@@ -1,0 +1,31 @@
+{
+    "name": "YezBot API",
+    "description": "A Twitch Bot",
+    "version": "1.0.0",
+    "main": "public/index.php",
+    "repository": "https://github.com/Yehzuna/yehbot-api.git",
+    "authors": [
+        {
+            "name": "Thomas Boruszewski",
+            "email": "yehzuna@outlook.com"
+        }
+    ],
+    "license": "MIT",
+    "require": {
+        "php": ">=7.0.20",
+        "ext-phalcon": ">=3.2.0",
+        "guzzlehttp/guzzle": "^6.3"
+    },
+    "require-dev": {
+        "phalcon/devtools": "dev-master",
+        "sneakybobito/phalcon-stubs": "^3.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "YezBot\\": "src/"
+        }
+    },
+    "scripts": {
+        "start": "php -S localhost:8000 -t public"
+    }
+}
