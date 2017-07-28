@@ -13,6 +13,8 @@ use Phalcon\Http\Response;
  */
 class ExceptionRender
 {
+    public $exception;
+
     /**
      * ExceptionRender constructor.
      *
@@ -20,6 +22,16 @@ class ExceptionRender
      */
     public function __construct(\Exception $exception)
     {
+        $this->exception = $exception;
+    }
+
+    /**
+     * @return Response
+     */
+    public function render()
+    {
+        $exception = $this->exception;
+
         if ($exception instanceof ClientException) {
             return $this->client($exception);
         } elseif ($exception instanceof AppException) {
@@ -45,7 +57,7 @@ class ExceptionRender
         ];
         $content = $this->debug($content, $exception);
 
-        return $this->render($content, $code, $status);
+        return $this->response($content, $code, $status);
     }
 
     /**
@@ -71,7 +83,7 @@ class ExceptionRender
         ];
         $content = $this->debug($content, $exception);
 
-        return $this->render($content, $data->status, $this->getStatus($data->status));
+        return $this->response($content, $data->status, $this->getStatus($data->status));
     }
 
     /**
@@ -87,7 +99,7 @@ class ExceptionRender
         ];
         $content = $this->debug($content, $exception);
 
-        return $this->render($content);
+        return $this->response($content);
     }
 
     /**
@@ -118,7 +130,7 @@ class ExceptionRender
      * @param string $status
      * @return Response
      */
-    public function render(array $content, int $code = 500, string $status = 'Internal Server Error')
+    public function response(array $content, int $code = 500, string $status = 'Internal Server Error')
     {
         $response = new Response();
         $response->setStatusCode($code, $status);

@@ -3,52 +3,56 @@
 namespace YezBot\Controllers;
 
 use YezBot\Controller;
+use YezBot\Exceptions\AppException;
 
 class AuthController extends Controller
 {
+    /**
+     *
+     */
     public function index()
     {
         $token = $this->getToken();
-        //$channel = $this->getChannel($token);
+        $channel = $this->getChannel($token);
 
-        /*
-        if (!$user = $this->getUser($channel->name)) {
+        if (!$this->getUser($channel->name)) {
             $this->setUser($channel);
-
-            $user = $this->getUser($channel->name);
         }
 
-        $this->setToken($token, $user->id);
+        $this->setToken($token);
 
-        return response()->json([
-            'hash' => Hash::make(env('APP_KEY') . $token),
-            'user' => $user
-        ]);*/
+        $this->jsonResponse([
+            'token' => sha1($this->config->key . $token),
+        ]);
     }
 
-
+    /**
+     * @return mixed
+     * @throws AppException
+     */
     private function getToken()
     {
         $code = $this->request->get('code');
         if (!$code) {
-            throw new \OAuthException("Missing authorization code", 400);
+            throw new AppException("Missing authorization code", 400);
         }
 
         $state = substr(sha1(microtime()), 0, 21);
 
         $data = $this->sendRequest('POST', 'oauth2/token', [
             'query' => [
-                'client_id'     => env('CLIENT_ID'),
-                'client_secret' => env('CLIENT_SECRET'),
+                'client_id'     => $this->config->client->client_id,
+                'client_secret' => $this->config->client->client_secret,
                 'grant_type'    => 'authorization_code',
-                'redirect_uri'  => env('REDIRECT_URI'),
+                'redirect_uri'  => $this->config->client->redirect_uri,
                 'code'          => $code,
                 'state'         => $state,
             ],
         ]);
 
-        /*
         //var_dump($data);
+
+        /*
         if ($state != $data['state']) {
             throw new JsonException("Invalid state", 400);
         }
@@ -62,7 +66,7 @@ class AuthController extends Controller
         $data = $this->sendRequest('GET', 'channel', [
             'headers' => [
                 'Accept'        => "application/vnd.twitchtv.v5+json",
-                'Client-ID'     => env('CLIENT_ID'),
+                'Client-ID'     => $this->config->client->client_id,
                 'Authorization' => "OAuth $token",
             ],
         ]);
@@ -71,14 +75,10 @@ class AuthController extends Controller
     }
 
 
-    private function setToken($token, $user_id)
+    private function setToken($token)
     {
-        DB::insert('INSERT INTO token (token, user_id) VALUES (?, ?, )', [
-            $token,
-            $user_id,
-        ]);
+        $this->session->set('token', $token);
     }
-
 
     private function getUser($channel)
     {

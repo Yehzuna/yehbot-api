@@ -1,12 +1,11 @@
 <?php
 
+use GuzzleHttp\Client;
 use Phalcon\Config\Adapter\Php as PhpConfig;
 use Phalcon\Db\Adapter\Pdo\Mysql;
 use Phalcon\Di\FactoryDefault;
 use Phalcon\Mvc\Micro;
 use Phalcon\Session\Adapter\Files as Session;
-use Phalcon\Mvc\Micro\Collection;
-use GuzzleHttp\Client;
 
 require_once '../vendor/autoload.php';
 
@@ -42,9 +41,8 @@ $di->setShared('client', function () {
 
 // Local server
 if ($_SERVER['SERVER_NAME'] == 'localhost') {
-    $_GET['_url'] = $_SERVER['REQUEST_URI'];
+    $_GET['_url'] = $_SERVER['PATH_INFO'];
 }
-
 
 // Init the app
 $app = new Micro();
@@ -53,22 +51,12 @@ $app->setDI($di);
 
 // Routes
 $app->get('/', function () {
-    //var_dump($this->get('config'));
 
-    //throw new Exception("Error", 500);
-
-    /** @var Mysql $db */
-    $db = $this->db;
-    var_dump($db->query('SELECT * FROM users'));
-
-    /** @var \Phalcon\Http\Request $request */
-    $request = $this->request;
-    var_dump($request->getURI());
 });
 
 $app->get('/auth', [
     new YezBot\Controllers\AuthController(),
-    'index'
+    'index',
 ]);
 
 $app->get('/users/{id}', function ($id) {
@@ -77,7 +65,9 @@ $app->get('/users/{id}', function ($id) {
 
 
 $app->error(function (\Exception $exception) {
-    return new \YezBot\Exceptions\ExceptionRender($exception);
+    $render = new \YezBot\Exceptions\ExceptionRender($exception);
+
+    return $render->render();
 });
 
 $app->notFound(function () {
