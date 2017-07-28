@@ -77,23 +77,7 @@ $app->get('/users/{id}', function ($id) {
 
 
 $app->error(function (\Exception $exception) {
-    if ($e instanceof JsonException) {
-        return new JsonResponse([
-            'error' => $e->getStatus(),
-            'message' => $e->getMessage(),
-        ], $e->getCode());
-    }
-
-    $response = new \Phalcon\Http\Response();
-    $response->setStatusCode(500, 'Internal Server Error');
-    $response->setJsonContent([
-        'code'    => $exception->getCode(),
-        'message' => $exception->getMessage(),
-        'file'    => $exception->getFile(),
-        'line'    => $exception->getLine(),
-    ]);
-
-    return $response;
+    return new \YezBot\Exceptions\ExceptionRender($exception);
 });
 
 $app->notFound(function () {

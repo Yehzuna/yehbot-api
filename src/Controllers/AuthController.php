@@ -31,7 +31,7 @@ class AuthController extends Controller
     {
         $code = $this->request->get('code');
         if (!$code) {
-            throw new \Exception("Missing authorization code", 400);
+            throw new \OAuthException("Missing authorization code", 400);
         }
 
         $state = substr(sha1(microtime()), 0, 21);

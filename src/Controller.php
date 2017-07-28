@@ -21,9 +21,9 @@ use Phalcon\Session\Adapter\Files as Session;
  */
 class Controller extends PhalconController
 {
-    public function jsonResponse($data, $code = 200)
+    public function jsonResponse(array $data, int $code = 200, string $status = 'Ok')
     {
-        $this->response->setStatusCode($code);
+        $this->response->setStatusCode($code, $status);
         $this->response->setJsonContent($data);
     }
 
