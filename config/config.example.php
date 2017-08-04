@@ -4,15 +4,26 @@ return [
     'debug'  => true,
     'env'    => 'dev',
     'key'    => '',
-    'db'     => [
+
+    'database'     => [
+        'adapter'  => 'mysql',
         'host'     => 'localhost',
         'username' => 'root',
         'password' => 'root',
         'dbname'   => 'api',
     ],
-    'client' => [
+
+    'twitch' => [
         'client_id'     => '123456',
         'client_secret' => '123456',
         'redirect_uri'  => 'http://localhost/',
+    ],
+
+    'bot' => [
+        'client_id'     => '123456',
+    ],
+
+    'dashboard' => [
+        'client_id'     => '123456',
     ],
 ];

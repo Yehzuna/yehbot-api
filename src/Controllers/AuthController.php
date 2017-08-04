@@ -5,14 +5,19 @@ namespace YezBot\Controllers;
 use YezBot\Controller;
 use YezBot\Exceptions\AppException;
 
+/**
+ * Class AuthController
+ *
+ * @package YezBot\Controllers
+ */
 class AuthController extends Controller
 {
     /**
      *
      */
-    public function index()
+    public function indexAction()
     {
-        $token = $this->getToken();
+        $token = $this->getTwitchToken();
         $channel = $this->getChannel($token);
 
         if (!$this->getUser($channel->name)) {
@@ -21,36 +26,34 @@ class AuthController extends Controller
 
         $this->setToken($token);
 
-        $this->jsonResponse([
-            'token' => sha1($this->config->key . $token),
-        ]);
+        $this->jsonResponse([]);
     }
 
     /**
      * @return mixed
      * @throws AppException
      */
-    private function getToken()
+    private function getTwitchToken()
     {
         $code = $this->request->get('code');
         if (!$code) {
             throw new AppException("Missing authorization code", 400);
         }
 
-        $state = substr(sha1(microtime()), 0, 21);
+        $state = $this->crypt->encryptBase64(microtime());
 
         $data = $this->sendRequest('POST', 'oauth2/token', [
             'query' => [
-                'client_id'     => $this->config->client->client_id,
-                'client_secret' => $this->config->client->client_secret,
+                'client_id'     => $this->config->twitch->client_id,
+                'client_secret' => $this->config->twitch->client_secret,
                 'grant_type'    => 'authorization_code',
-                'redirect_uri'  => $this->config->client->redirect_uri,
+                'redirect_uri'  => $this->config->twitch->redirect_uri,
                 'code'          => $code,
                 'state'         => $state,
             ],
         ]);
 
-        //var_dump($data);
+        var_dump($data);
 
         /*
         if ($state != $data['state']) {
@@ -74,33 +77,4 @@ class AuthController extends Controller
         return $data;
     }
 
-
-    private function setToken($token)
-    {
-        $this->session->set('token', $token);
-    }
-
-    private function getUser($channel)
-    {
-        return DB::selectOne('SELECT * FROM users WHERE channel = ?', [
-            $channel,
-        ]);
-    }
-
-    private function setUser($channel)
-    {
-        $name = $channel->display_name;
-        if (empty($name)) {
-            $name = $channel->name;
-        }
-
-        DB::insert('INSERT INTO users (channel_id, channel, name, email, created_at, updated_at) VALUES (?, ?, ?, ?, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)', [
-            $channel->_id,
-            $channel->name,
-            $name,
-            $channel->email,
-        ]);
-
-        return DB::getPdo()->lastInsertId();
-    }
 }

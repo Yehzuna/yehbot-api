@@ -26,6 +26,8 @@ class ExceptionRender
     }
 
     /**
+     * Init the format
+     *
      * @return Response
      */
     public function render()
@@ -42,6 +44,8 @@ class ExceptionRender
     }
 
     /**
+     * Format a intern exception
+     *
      * @param AppException $exception
      * @return Response
      */
@@ -61,6 +65,8 @@ class ExceptionRender
     }
 
     /**
+     * Format a ClientException exception (GuzzleHttp)
+     *
      * @param ClientException $exception
      * @return Response
      */
@@ -87,22 +93,28 @@ class ExceptionRender
     }
 
     /**
+     * Format a generic exception
+     *
      * @param \Exception $exception
      * @return Response
      */
     public function generic(\Exception $exception)
     {
+        $status = $this->getStatus(500);
+
         $content = [
             'code'    => $exception->getCode(),
-            'error'   => $this->getStatus($exception->getCode()),
+            'error'   => $status,
             'message' => $exception->getMessage(),
         ];
         $content = $this->debug($content, $exception);
 
-        return $this->response($content);
+        return $this->response($content, 500, $status);
     }
 
     /**
+     * Add debug information to the response
+     *
      * @param array      $content
      * @param \Exception $exception
      * @return array
@@ -125,12 +137,14 @@ class ExceptionRender
     }
 
     /**
+     * Send the response
+     *
      * @param array  $content
      * @param int    $code
      * @param string $status
      * @return Response
      */
-    public function response(array $content, int $code = 500, string $status = 'Internal Server Error')
+    public function response(array $content, int $code, string $status)
     {
         $response = new Response();
         $response->setStatusCode($code, $status);
@@ -140,6 +154,8 @@ class ExceptionRender
     }
 
     /**
+     * Get the HTML status message from a code
+     *
      * @param int $code
      * @return string
      */
