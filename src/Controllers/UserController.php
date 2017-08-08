@@ -22,7 +22,7 @@ class UserController extends Controller
         $user = $this->get($channel);
 
         if (!$user) {
-            throw new AppException("Invalid channel, User not fount", 400);
+            throw new AppException('user_not_found', "The user doesn't exist or the channel given is invalid.", 404);
         }
 
         $this->jsonResponse($user->toArray());
@@ -32,7 +32,7 @@ class UserController extends Controller
      * @param string $channel
      * @return Users
      */
-    protected function get(string $channel)
+    public function get(string $channel)
     {
         return Users::findFirstByChannel($channel);
     }
@@ -42,7 +42,7 @@ class UserController extends Controller
      * @return Users
      * @throws AppException
      */
-    protected function add($channel)
+    public function add($channel)
     {
         $name = $channel->display_name;
         if (empty($name)) {
@@ -57,7 +57,7 @@ class UserController extends Controller
         if (!$user->save()) {
             $messages = $user->getMessages();
 
-            throw new AppException(implode(" ", $messages), 400);
+            throw new AppException('error_save_user', implode(" ", $messages), 400);
         }
 
         return $user;

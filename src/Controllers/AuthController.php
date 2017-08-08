@@ -37,7 +37,7 @@ class AuthController extends Controller
     {
         $code = $this->request->get('code');
         if (!$code) {
-            throw new AppException("Missing authorization code", 400);
+            throw new AppException('invalid_auth_code',"The authorization code is missing.", 400);
         }
 
         $state = $this->crypt->encryptBase64(microtime());

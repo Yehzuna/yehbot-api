@@ -7,13 +7,13 @@ use Phalcon\Config\Adapter\Php as PhpConfig;
 use Phalcon\Crypt;
 use Phalcon\Db\Adapter\Pdo\Mysql;
 use Phalcon\Di\FactoryDefault;
-use Phalcon\Http\Response;
 use Phalcon\Mvc\Micro;
 use Phalcon\Mvc\Micro\Collection;
 use Phalcon\Session\Adapter\Files as Session;
 use YezBot\Controllers\AuthController;
 use YezBot\Controllers\UserController;
 use YezBot\Exceptions\ExceptionRender;
+use YezBot\Responses\AppResponse;
 
 /**
  * Class Bootstrap
@@ -111,14 +111,10 @@ class Bootstrap
         });
 
         $app->notFound(function () {
-            $response = new Response();
-            $response->setStatusCode(404, 'Not Found');
-            $response->setJsonContent([
-                'code'    => 404,
-                'message' => "Route not found",
-            ]);
-
-            return $response;
+            return AppResponse::response([
+                'error'             => "not_found",
+                'error_description' => "Route not found",
+            ], 404);
         });
     }
 }
